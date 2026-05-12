@@ -1,26 +1,25 @@
-require('dotenv').config();
+const TelegramBot = require("node-telegram-bot-api");
+const express = require("express");
 
-const TelegramBot = require('node-telegram-bot-api');
-const { OpenAI } = require('openai');
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const bot = new TelegramBot(token, { polling: true });
 
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const app = express();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+app.get("/", (req, res) => {
+  res.send("Bot is running");
 });
 
-bot.on('message', async (msg) => {
+// رد بسيط (ذكاء اصطناعي وهمي كبداية)
+bot.on("message", (msg) => {
   const chatId = msg.chat.id;
+  const text = msg.text;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: msg.text }]
-    });
+  bot.sendMessage(chatId, "🤖 استلمت رسالتك: " + text);
+});
 
-    bot.sendMessage(chatId, response.choices[0].message.content);
-
-  } catch (error) {
-    bot.sendMessage(chatId, "صار خطأ 😅");
-  }
+// تشغيل السيرفر
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log("Bot is running on port " + port);
 });
